@@ -1,4 +1,3 @@
-// routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
@@ -8,11 +7,17 @@ router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const user = await User.findOne({ username });
+    const uname = username.toLowerCase(); // ✅ normalize username
+    console.log('📩 Ирсэн хэрэглэгчийн нэр:', uname);
+
+    const user = await User.findOne({ username: uname });
 
     if (!user) {
+      console.log('❌ Хэрэглэгч олдсонгүй:', uname);
       return res.status(404).json({ message: 'Хэрэглэгч олдсонгүй' });
     }
+
+    console.log('✅ Олдсон хэрэглэгч:', user.username, '| Role:', user.role);
 
     if (user.role === 'player') {
       return res.status(403).json({ message: 'Тоглогч нэвтрэх эрхгүй' });
@@ -25,11 +30,12 @@ router.post('/login', async (req, res) => {
     return res.status(200).json({
       name: user.name,
       username: user.username,
-      role: user.role,
+      role: user.role
     });
 
   } catch (err) {
-    res.status(500).json({ message: 'Серверийн алдаа', error: err.message });
+    console.error('💥 Серверийн алдаа:', err.message);
+    res.status(500).json({ message: 'Дотоод серверийн алдаа' });
   }
 });
 
